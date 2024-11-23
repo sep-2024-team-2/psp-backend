@@ -17,6 +17,28 @@ sequelize.sync({ force: false }).then(() => {
 // Routes
 app.get("/", (req, res) => res.send("PSP is running on port 8080"));
 
+app.get("/api/webshop", async (req, res) => {
+  try {
+    const { port } = req.query;
+    if (!port) {
+      return res.status(400).json({ message: "Port is required" });
+    }
+
+    const webshop = await Webshop.findOne({ where: { port } });
+
+    if (!webshop) {
+      return res
+        .status(404)
+        .json({ message: "Webshop not found for this port" });
+    }
+
+    res.json({ webshopId: webshop.id });
+  } catch (error) {
+    console.error("Error fetching webshop ID:", error);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
 app.post("/api/psp/payment-options", async (req, res) => {
   try {
     const { totalPrice, port } = req.body;
