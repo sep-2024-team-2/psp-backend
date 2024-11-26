@@ -10,6 +10,7 @@ const swaggerDocument = require(path.join(__dirname, "swagger.json"));
 const app = express();
 const PORT = 8080;
 
+app.use(express.json());
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -191,6 +192,99 @@ app.post("/api/psp/payment-options", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+app.post("/api/webshops/:webshopId/payment-methods/add", async (req, res) => {
+  try {
+    const { webshopId } = req.params;
+    const { newMethod } = req.body;
+
+    if (isNaN(webshopId)) {
+      return res.status(400).json({ error: "Invalid webshop ID." });
+    }
+
+    if (!newMethod) {
+      return res.status(400).json({ error: "New payment method is required." });
+    }
+
+    const webshop = await Webshop.findOne({ where: { id: webshopId } });
+
+    if (!webshop) {
+      return res.status(404).json({ error: "Webshop not found." });
+    }
+
+    console.log("Before update:", webshop.paymentOptions);
+
+    const existingMethods = webshop.paymentOptions || [];
+    if (existingMethods.includes(newMethod)) {
+      return res.status(400).json({ error: "Method already exists." });
+    }
+
+    existingMethods.push(newMethod);
+    webshop.paymentOptions = existingMethods;
+
+    webshop.changed("paymentOptions", true);
+
+    console.log("After update:", webshop.paymentOptions);
+
+    await webshop.save();
+
+    res.json({
+      message: "Payment method added successfully.",
+      paymentOptions: webshop.paymentOptions,
+    });
+  } catch (error) {
+    console.error("Error adding payment method:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+app.post("/webshops/:webshopId/payment-methods/remove", async (req, res) => {
+  try {
+    const { webshopId } = req.params;
+    const { methodToRemove } = req.body;
+
+    if (isNaN(webshopId)) {
+      return res.status(400).json({ error: "Invalid webshop ID." });
+    }
+
+    if (!methodToRemove) {
+      return res
+        .status(400)
+        .json({ error: "Payment method to remove is required." });
+    }
+
+    const webshop = await Webshop.findOne({ where: { id: webshopId } });
+    console.log(webshop);
+
+    if (!webshop) {
+      return res.status(404).json({ error: "Webshop not found." });
+    }
+
+    if (webshop.paymentOptions.length === 1) {
+      return res
+        .status(400)
+        .json({ error: "At least one payment method is required." });
+    }
+
+    const existingMethods = webshop.paymentOptions || [];
+    if (!existingMethods.includes(methodToRemove)) {
+      return res.status(400).json({ error: "Payment method not found." });
+    }
+
+    const updatedMethods = existingMethods.filter(
+      (method) => method !== methodToRemove
+    );
+    webshop.paymentOptions = updatedMethods;
+
+    await webshop.save();
+
+    res.json({
+      message: "Payment method removed successfully.",
+      paymentOptions: webshop.paymentOptions,
+    });
+  } catch (error) {
+    console.error("Error removing payment method:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 app.get("/webshops/:port", async (req, res) => {
   try {
@@ -200,7 +294,7 @@ app.get("/webshops/:port", async (req, res) => {
     if (!webshop) {
       return res.status(404).json({ message: "Webshop not found" });
     }
-
+    //
     res.json({ paymentOptions: webshop.paymentOptions });
   } catch (error) {
     res.status(400).json({ error: error.message });

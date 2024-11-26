@@ -68,6 +68,96 @@
         }
       }
     },
+    "/api/webshops/{webshopId}/payment-methods/add": {
+      "post": {
+        "summary": "Add a payment method",
+        "description": "Adds a new payment method to a webshop",
+        "parameters": [
+          {
+            "name": "webshopId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "newMethod": { "type": "string" }
+              },
+              "required": ["newMethod"]
+            }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Payment method added successfully" },
+          "400": { "description": "Invalid input or method already exists" },
+          "404": { "description": "Webshop not found" }
+        }
+      }
+    },
+    "/webshops/{webshopId}/payment-methods/remove": {
+      "post": {
+        "summary": "Remove a payment method from a webshop",
+        "parameters": [
+          {
+            "name": "webshopId",
+            "in": "path",
+            "description": "ID of the webshop",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "methodToRemove",
+            "in": "body",
+            "description": "The payment method to be removed",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "methodToRemove": {
+                  "type": "string",
+                  "example": "paypal"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment method removed successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Payment method removed successfully."
+                },
+                "paymentOptions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": ["card"]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, invalid input"
+          },
+          "404": {
+            "description": "Webshop not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/api/payments": {
       "post": {
         "summary": "Process payment",
@@ -96,34 +186,6 @@
         }
       }
     },
-    "/api/psp/process-payment": {
-      "post": {
-        "summary": "Process PSP payment",
-        "description": "Processes a PSP payment with the specified method",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "webshopId": { "type": "string" },
-                "method": { "type": "string" },
-                "amount": { "type": "number" },
-                "metadata": { "type": "object" }
-              },
-              "required": ["webshopId", "method", "amount"]
-            }
-          }
-        ],
-        "responses": {
-          "200": { "description": "Payment processed successfully" },
-          "400": { "description": "Invalid input" },
-          "404": { "description": "Payment method not found" }
-        }
-      }
-    },
     "/api/psp/add-method": {
       "post": {
         "summary": "Add payment method",
@@ -149,7 +211,6 @@
         }
       }
     },
-
     "/api/psp/payment-options": {
       "post": {
         "summary": "Get payment options",

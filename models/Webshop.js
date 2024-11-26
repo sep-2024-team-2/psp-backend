@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("./index");
 
 const Webshop = sequelize.define(
-  "Webshop",
+  "Webshop", // Naziv modela
   {
     name: {
       type: DataTypes.STRING,
@@ -13,11 +13,12 @@ const Webshop = sequelize.define(
       allowNull: false,
     },
     paymentOptions: {
-      type: DataTypes.ARRAY(DataTypes.STRING), // Opcije: ["card", "paypal", "crypto", "bank_transfer"]
+      type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: false,
     },
   },
   {
+    tableName: "Webshops",
     timestamps: false,
   }
 );
