@@ -1,0 +1,189 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "PSP API",
+    "description": "API for Payment Service Provider"
+  },
+  "host": "localhost:8080",
+  "basePath": "/",
+  "schemes": ["http"],
+  "paths": {
+    "/api/webshop/register": {
+      "post": {
+        "summary": "Register a webshop",
+        "description": "Registers a new webshop with payment methods",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "webshopId": { "type": "string" },
+                "paymentOptions": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              },
+              "required": ["name", "webshopId", "paymentOptions"]
+            }
+          }
+        ],
+        "responses": {
+          "201": { "description": "Webshop created successfully" },
+          "400": { "description": "Invalid input" },
+          "409": { "description": "Webshop with this ID already exists" }
+        }
+      }
+    },
+    "/api/webshops/{webshopId}/payment-methods": {
+      "get": {
+        "summary": "Get payment methods",
+        "description": "Fetches the payment methods available for a webshop",
+        "parameters": [
+          {
+            "name": "webshopId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of payment methods",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "paymentMethods": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            }
+          },
+          "404": { "description": "Webshop not found" }
+        }
+      }
+    },
+    "/api/payments": {
+      "post": {
+        "summary": "Process payment",
+        "description": "Processes a payment for a webshop",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "webshopId": { "type": "string" },
+                "method": { "type": "string" },
+                "amount": { "type": "number" },
+                "metadata": { "type": "object" }
+              },
+              "required": ["webshopId", "method", "amount"]
+            }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Payment processed successfully" },
+          "400": { "description": "Invalid input" },
+          "404": { "description": "Webshop or method not found" }
+        }
+      }
+    },
+    "/api/psp/process-payment": {
+      "post": {
+        "summary": "Process PSP payment",
+        "description": "Processes a PSP payment with the specified method",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "webshopId": { "type": "string" },
+                "method": { "type": "string" },
+                "amount": { "type": "number" },
+                "metadata": { "type": "object" }
+              },
+              "required": ["webshopId", "method", "amount"]
+            }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Payment processed successfully" },
+          "400": { "description": "Invalid input" },
+          "404": { "description": "Payment method not found" }
+        }
+      }
+    },
+    "/api/psp/add-method": {
+      "post": {
+        "summary": "Add payment method",
+        "description": "Adds a new payment method to the PSP",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "classPath": { "type": "string" }
+              },
+              "required": ["name", "classPath"]
+            }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Payment method added successfully" },
+          "400": { "description": "Invalid input" }
+        }
+      }
+    },
+
+    "/api/psp/payment-options": {
+      "post": {
+        "summary": "Get payment options",
+        "description": "Fetches payment options for a specific webshop",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "webshopId": { "type": "string" }
+              },
+              "required": ["webshopId"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of payment options",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "paymentMethods": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            }
+          },
+          "404": { "description": "Webshop not found" }
+        }
+      }
+    }
+  }
+}
